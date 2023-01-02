@@ -93,6 +93,19 @@ class EmailOutputChannel(OutputChannel):
             except Exception:
                 vars['Location'] = self.data['location']
 
+        if 'log4_shell_computer_name' in self.data:
+            vars['Log4JComputerName'] = self.data['log4_shell_computer_name']
+
+        if 'generic_data' in self.data:
+            vars['GenericData'] = self.data['generic_data']
+
+        if 'cmd_computer_name' in self.data and 'cmd_user_name' in self.data:
+            vars['CMDInformation'] = 'User {user} executed "{process}" on the host {computer}'.format(
+                user=self.data['cmd_user_name'],
+                process=self.data.get('cmd_process'),
+                computer=self.data['cmd_computer_name']
+            )
+
         return vars
 
     def do_send_alert(self, input_channel=None, canarydrop=None, **kwargs):

@@ -4,5 +4,6 @@ tokensvenv/*
 *.log
 *.pid
 .vscode
+.DS_Store
 .idea
 .stylelintrc.json

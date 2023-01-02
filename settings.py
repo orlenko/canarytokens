@@ -17,6 +17,8 @@ else:
     CHANNEL_DNS_PORT=53
     CHANNEL_MYSQL_PORT=3306
 
+CHANNEL_MTLS_KUBECONFIG_PORT=6443
+
 CHANNEL_LINKEDIN_MIN_DELAY=60*60*24
 CHANNEL_IMGUR_MIN_DELAY=60*60
 CHANNEL_BITCOIN_MIN_DELAY=60*60
@@ -34,20 +36,22 @@ TOKEN_RETURN="gif" #could be gif, fortune
 MAX_UPLOAD_SIZE=1024 * 1024 * 1
 WEB_IMAGE_UPLOAD_PATH='/uploads'
 
-CANARY_AWSID_URL = "https://1luncdvp6l.execute-api.us-east-2.amazonaws.com/prod/CreateUserAPITokens"
-
 for envvar in ['SMTP_PORT', 'SMTP_USERNAME', 'SMTP_PASSWORD', 'SMTP_SERVER', 'AWSID_URL',
                'MAILGUN_DOMAIN_NAME', 'MAILGUN_API_KEY','MAILGUN_BASE_URL','MANDRILL_API_KEY','SENDGRID_API_KEY',
                'PUBLIC_IP','PUBLIC_DOMAIN','ALERT_EMAIL_FROM_ADDRESS','ALERT_EMAIL_FROM_DISPLAY',
                'ALERT_EMAIL_SUBJECT','DOMAINS','NXDOMAINS', 'TOKEN_RETURN', 'MAX_UPLOAD_SIZE',
                'WEB_IMAGE_UPLOAD_PATH', 'DEBUG', 'IPINFO_API_KEY', 'SWITCHBOARD_LOG_COUNT',
                'SWITCHBOARD_LOG_SIZE', 'FRONTEND_LOG_COUNT', 'FRONTEND_LOG_SIZE', 'MAX_HISTORY',
-               'MAX_ALERTS_PER_MINUTE']:
+               'MAX_ALERTS_PER_MINUTE', 'WG_PRIVATE_KEY_SEED', 'WG_PRIVATE_KEY_N', 'DEV_BUILD_ID',
+               'CACHED_DNS_REQUEST_PERIOD']:
     try:
         setattr(settingsmodule, envvar, os.environ['CANARY_'+envvar])
     except KeyError:
         if not hasattr(settingsmodule, envvar):
             setattr(settingsmodule, envvar, '')
+
+if getattr(settingsmodule, 'AWSID_URL') == '':
+    setattr(settingsmodule, 'AWSID_URL', "https://1luncdvp6l.execute-api.us-east-2.amazonaws.com/prod/CreateUserAPITokens")
 
 if type(DEBUG) == str:
     DEBUG = (DEBUG == "True")
@@ -79,6 +83,12 @@ for log_config in ['SWITCHBOARD_LOG_COUNT', 'SWITCHBOARD_LOG_SIZE', 'FRONTEND_LO
         val = 5000000
 
     setattr(settingsmodule, log_config, int(val))
+
+# Configure the caching period for deduplicating DNS requests. Default period is 10
+try:
+    setattr(settingsmodule, 'CACHED_DNS_REQUEST_PERIOD', int(getattr(settingsmodule, 'CACHED_DNS_REQUEST_PERIOD')))
+except:
+    setattr(settingsmodule, 'CACHED_DNS_REQUEST_PERIOD', 10)
 
 # Configure the maximum number of saved hits on any token. Default list size is 10
 try:
